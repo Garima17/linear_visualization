@@ -591,51 +591,6 @@ function link_end_id(end){
   return (end !== null && typeof end === "object") ? end.id : end
 }
 
-// ============================================================
-// Selection: the details panel and highlights are pinned by a click,
-// not by hover. Clicking empty chart space or pressing Escape clears it.
-// ============================================================
-
-// colour of a node under the current colour-coding (no selection or find highlight)
-function node_colour(d){
-  var ext = extent_of_centralities_after_removing_outliers
-  if (degreeColFlag == 1) return d.centrality > ext.degree_range[1] ? "black" : colorscaleDegree(d.centrality)
-  if (closenessColFlag == 1) return d.closeness > ext.closeness_range[1] ? "black" : colorscaleCloseness(d.closeness)
-  if (betweennessColFlag == 1) return d.betwness > ext.betwness_range[1] ? "black" : colorscaleBetwness(d.betwness)
-  if (eignColFlag == 1) return d.eign > ext.eign_range[1] ? "black" : colorscaleEign(d.eign)
-  return colorscaleDensity(d.density)
-}
-
-// remove the current node / community selection and its highlights
-function clear_selection(){
-  activeCommunity = 200
-  clear_selection_panels()
-  d3.selectAll(".barLight").attr("class", "bar")
-  d3.selectAll(".strokechange").attr("class", "heat_map")
-
-  // Most Connected keeps its own dimming
-  var mc_nodes = (flag_most_connected_nodes && most_connected_nodes_data) ? new Set(most_connected_nodes_data.map(function(d){ return d.node })) : null
-  d3.select("#chart").selectAll("circle")
-    .filter(function(d){ return d && d.node !== undefined })
-    .attr("r", function(d){ return d.node == find_node_id ? 4 : global_radius })
-    .style("fill", function(d){ return d.node == find_node_id ? "black" : node_colour(d) })
-    .style("stroke", null)
-    .attr("opacity", function(d){ return mc_nodes ? (mc_nodes.has(d.node) ? 1 : .05) : 1 })
-  d3.selectAll(".comm_nodes circle")
-    .style("fill", "#69b3a2")
-    .attr("opacity", mc_nodes ? .05 : 1)
-
-  d3.selectAll("tr").style("background-color", function(d){
-    if (d !== undefined) return d.node == find_node_id ? "blue" : "transparent"
-  })
-}
-
-document.addEventListener("keydown", function(event){
-  if (event.key !== "Escape" || !global_data) return
-  div.style("opacity", 0)
-  clear_selection()
-})
-
 // draw spiral in side window on click community
 function draw_coarse_graph_in_side_window( adjacent_nodes, activeNode){
 console.log("inside_coarse")
@@ -712,9 +667,7 @@ d3.select("#node_spiral").select("svg").remove()
     return d.id})
 
 
-  nodes.style("cursor", "pointer")
-  nodes.on('click', function (e,d) {
-    clear_selection()
+  nodes.on('mouseover', function (e,d) {
     activeCommunity =  d.id
     adjacent_community = community_connections_list[d.id]
 
@@ -755,6 +708,18 @@ d3.select("#node_spiral").select("svg").remove()
       .style('stroke-width', function (link_d) { 
         return (link_d.source.id === d.id || link_d.target.id === d.id) ? 4 : edge_strength_scale(d.WEIGHT);})
       */ } )
+  .on('mouseout', function (d) {
+    nodes.style('fill', "#69b3a2")
+    console.log("log out this ")
+    d3.selectAll("circle")
+    .attr("opacity", 1)
+
+    links
+      .style('stroke', "grey")
+      .style('stroke-width', function(d){
+        
+        return  edge_strength_scale(d.WEIGHT)})
+  })
 
 
 
@@ -1128,15 +1093,10 @@ gBrush = g.append("g")
 .attr("class", "brush")
 
 //define brush
-brush = d3.brush().on("end", function(event) {
+brush = d3.brush().on("end", function() {
   brushFlag=1
   var s = d3.brushSelection(this);
   if (!s) {
-    // a click on empty chart space (not a programmatic brush reset) clears the selection
-    if (event && event.sourceEvent) {
-      div.style("opacity", 0)
-      clear_selection()
-    }
     if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
     xScale.domain(xExtent);
     yScale.domain(yExtent);
@@ -1255,7 +1215,6 @@ console.log(global_data)
                     }
                        })
                   .attr("pointer-events", "all")
-                  .style("cursor", "pointer")
                   .on("mouseover", function(event,d) {
                                      
                                       div.transition()
@@ -1263,7 +1222,7 @@ console.log(global_data)
                                           .style("opacity", .9);
 
                                       if (flag_most_connected_nodes){
-                                        div.html("<b>Community:</b> " +d.community + "<br/><span style='color:#777'>Click for details</span>")
+                                        div.html("<b>Community:</b> " +d.community)
                                         .style("left", (event.pageX) + "px")
                                         .style("top", (event.pageY - 28) + "px");
 
@@ -1276,17 +1235,15 @@ console.log(global_data)
                                                  "<b>Closeness:</b> "+ parseFloat(d.closeness).toFixed(4) + full_network_suffix() +"<br/>"+
                                                  "<b>Betweenness:</b> "+ parseFloat(d.betwness).toFixed(4) +"<br/>"+
                                                  "<b>Eigenvector:</b> "+ parseFloat(d.eign).toFixed(4) + full_network_suffix() +"<br/>"+
-                                                 "<b>CS Field:</b> "+ csName + "<br/><span style='color:#777'>Click for details</span>")
+                                                 "<b>CS Field:</b> "+ csName )
                                         .style("left", (event.pageX) + "px")
                                         .style("top", (event.pageY - 28) + "px")
                                         .style("text-align", "left");
 
                                       }
-                                  })
 
-                  // click pins the node: details panel, neighbour highlight, table row
-                  .on("click", function(event,d) {
-                                          clear_selection()
+
+
                                           activeCommunity = d.community
                                           activeNode = d.node
                                           adjacent_community = community_connections_list[activeCommunity]
@@ -1472,14 +1429,46 @@ console.log(global_data)
                                                    //.style("stroke-opacity", .5);
                                             }*/
 
-                                          // mark the selected node
-                                          d3.select(this).attr("r", 4).style("stroke", "black").style("stroke-width", 1)
                                       })
 
                   .on("mouseout", function(d) {
                                       div.transition()
                                           .duration(500)
                                           .style("opacity", 0);
+
+                                      d3.selectAll(".adjacent_edges")
+                                      .remove()
+
+                                      d3.selectAll(".barLight")
+                                      .attr("class", "bar");
+
+                                      d3.selectAll(".strokechange")
+                                      .attr("class", "heat_map")
+
+                                      if(!flag_most_connected_nodes){
+                                      d3.selectAll("circle")
+                                      .attr("opacity", 1)}
+
+                                      d3.select("table").selectAll("tr").style("background-color", function(d,i){
+                                        if (d!== undefined)
+                                          {
+                                            if (d.node == find_node_id)
+                                              return "blue";
+                                            else
+                                              return "transparent"
+
+                                          }})
+
+                                     /* if (brushFlag==0)
+                                      {
+                                        d3.selectAll(".spiral_edges").style("stroke-opacity", 1)
+                                      }
+                                      else
+                                      {
+                                        d3.selectAll(".spiral_edges").style("stroke-opacity", 0)
+                                      }
+                                      console.log(d3.selectAll(".spiral_edges").style("stroke-opacity"))
+*/
                                   })
                   /*.on("click", function(event,d) {
                                                     //console.log(d.community)
@@ -1749,9 +1738,7 @@ coarse_graph_links = svg
 
 */
     // Add the highlighting functionality
-    coarse_graph_nodes.style("cursor", "pointer")
-    coarse_graph_nodes.on('click', function (e,d) {
-      clear_selection()
+    coarse_graph_nodes.on('mouseover', function (e,d) {
       activeCommunity = d.id
       console.log(d)
       adjacent_community = community_connections_list[d.id]
@@ -1796,6 +1783,14 @@ coarse_graph_links = svg
       //coarse_graph_links
         //.style('stroke', function (link_d) { return link_d.source === d.id || link_d.target === d.id ? '#69b3b2' : '#b8b8b8';})
         //.style('stroke-width', function (link_d) { return link_d.source === d.id || link_d.target === d.id ? 4 : 1;})
+    })
+    .on('mouseout', function (d) {
+       d3.selectAll("circle")
+        .attr("opacity", 1)
+      //nodes.style('fill', "#69b3a2")
+      //coarse_graph_links
+        //.style('stroke', 'black')
+        //.style('stroke-width', '1')
     })
 
 
