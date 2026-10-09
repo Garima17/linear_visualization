@@ -77,7 +77,7 @@ function draw_textbox(data, adjacent_nodes, activeNode, count, deg, bet, clo, ei
 
   // append the svg object to the body of the page
   var svg = d3.select("#node_textbox")
-      .html("<b>Node of interest: </b>"+ activeNode +"<br/>" + featureHtml +"<b>Degree: </b>"+ deg + degree_label_suffix(active_node_obj) +"<br/>" +"<b>Closeness: </b>"+ clo + full_network_suffix() +"<br/>" + "<b>Betweenness: </b>"+ bet +"<br/>" +"<b>Eigen: </b>"+ eig + full_network_suffix() +"<br/>" + "<br/>"
+      .html("<b>Node of interest: </b>"+ activeNode +"<br/>" + featureHtml +"<b>Degree: </b>"+ deg + degree_label_suffix(active_node_obj) +"<br/>" +"<b>Closeness: </b>"+ clo + full_network_suffix() +"<br/>" +"<b>Eigen: </b>"+ eig + full_network_suffix() +"<br/>" + "<br/>"
        + "<b>Total edges:</b> " + adjacent_nodes.length + "<br/>" +
        "<b>Intra-community node-to-node edges:</b> " + count + "<br/>" +
        "<b>Inter-community node-to-node edges:</b> " + inter_community_connections + "<br/>" +
@@ -1228,14 +1228,20 @@ console.log(global_data)
 
                                       }
                                       else{
-                                        var csClass = nodeFeatureLookup.hasOwnProperty(d.node) ? nodeFeatureLookup[d.node] : -1;
-                                        var csName = CS_FIELD_NAMES.hasOwnProperty(csClass) ? CS_FIELD_NAMES[csClass] : "Unknown";
+                                        // metadata line: the dataset's own feature column (as in the details panel); none without metadata
+                                        var featureLine = "";
+                                        if (Object.keys(nodeFeatureLookup).length > 0) {
+                                          var colLabel = nodeFeatureColumnName ? (nodeFeatureColumnName.charAt(0).toUpperCase() + nodeFeatureColumnName.slice(1).replace(/_/g, ' ')) : "Feature";
+                                          var fieldVal = nodeFeatureLookup.hasOwnProperty(d.node) ? nodeFeatureLookup[d.node] : -1;
+                                          var fieldName = FIELD_NAMES.hasOwnProperty(fieldVal) ? FIELD_NAMES[fieldVal] : (fieldVal === -1 ? "Unknown" : fieldVal);
+                                          featureLine = "<br/><b>" + colLabel + ":</b> " + fieldName;
+                                        }
                                         div.html("<b>Node:</b> "+ d.node +"<br/>" +"<b>Community:</b> " +d.community+ "<br/>"+
                                                  "<b>Degree:</b> "+ parseFloat(d.centrality).toFixed(2) + degree_label_suffix(d) +"<br/>"+
                                                  "<b>Closeness:</b> "+ parseFloat(d.closeness).toFixed(4) + full_network_suffix() +"<br/>"+
                                                  "<b>Betweenness:</b> "+ parseFloat(d.betwness).toFixed(4) +"<br/>"+
-                                                 "<b>Eigenvector:</b> "+ parseFloat(d.eign).toFixed(4) + full_network_suffix() +"<br/>"+
-                                                 "<b>CS Field:</b> "+ csName )
+                                                 "<b>Eigenvector:</b> "+ parseFloat(d.eign).toFixed(4) + full_network_suffix() +
+                                                 featureLine )
                                         .style("left", (event.pageX) + "px")
                                         .style("top", (event.pageY - 28) + "px")
                                         .style("text-align", "left");

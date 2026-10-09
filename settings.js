@@ -390,7 +390,6 @@ function colorNodesByEign(){
     var node_community;
     var node_density,
     node_centrality,
-    node_betweness,
     node_closeness,
     node_eign;
 
@@ -426,7 +425,6 @@ function colorNodesByEign(){
         node_community = global_data[i].community
         node_density = global_data[i].density
         node_centrality = global_data[i].centrality
-        node_betweness = global_data[i].betwness
         node_closeness = global_data[i].closeness
         node_eign = global_data[i].eign
         break;
@@ -458,7 +456,6 @@ function colorNodesByEign(){
       .html("<br/><b>NODE DATA</b><br/><b>Community: </b>"+ node_community +"<br/>" + 
       featureHtml +
       "<b>Degree:</b> "+ node_centrality + degree_label_suffix(found_node) + "<br/>" +
-       "<b>Betweeness:</b> " + node_betweness + "<br/>" +
        "<b>Closeness:</b> " + node_closeness + full_network_suffix() + "<br/>" +
        "<b>Eign:</b> " + node_eign + full_network_suffix() )
        .style("font-size", "12px")
