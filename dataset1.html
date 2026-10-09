@@ -216,7 +216,7 @@
                 <ul class="navbar-nav ps-3">
                   <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="degree_ranking()" type="button">Degree Centrality</button></li>
                   <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="closeness_ranking()" type="button">Closeness Centrality</button></li>
-                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="between_ranking()" type="button">Betweenness Centrality</button></li>
+                  <li class="d-none"><button class="btn btn-sm btn-outline-secondary mb-1" onclick="between_ranking()" type="button">Betweenness Centrality</button></li>
                   <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="eign_ranking()" type="button">Eign Centrality</button></li>
                 </ul>
               </div>
@@ -249,7 +249,7 @@
                   <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByDensity()" type="button">Density</button></li>
                   <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByDegree()" type="button">Degree</button></li>
                   <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByCloseness()" type="button">Closeness</button></li>
-                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByBetweeness()" type="button">Betweenness</button></li>
+                  <li class="d-none"><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByBetweeness()" type="button">Betweenness</button></li>
                   <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByEign()" type="button">Eign</button></li>
                 </ul>
               </div>
@@ -327,7 +327,7 @@
                     <label class="form-label text-white">Eign>= <input type="text" id="textInputeig" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max=".1" step=".01" id="Eign" onchange="updateTextInputeig(this.value)" value="0">
                   </li>
-                  <li>
+                  <li class="d-none"><!-- betweenness not computed yet (kept 0) -->
                     <label class="form-label text-white">Betweenness>= <input type="text" id="textInputbet" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max="1" step=".1" id="Betweenness" onchange="updateTextInputbet(this.value)" value="0">
                   </li>
