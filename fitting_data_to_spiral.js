@@ -1239,7 +1239,6 @@ console.log(global_data)
                                         div.html("<b>Node:</b> "+ d.node +"<br/>" +"<b>Community:</b> " +d.community+ "<br/>"+
                                                  "<b>Degree:</b> "+ parseFloat(d.centrality).toFixed(2) + degree_label_suffix(d) +"<br/>"+
                                                  "<b>Closeness:</b> "+ parseFloat(d.closeness).toFixed(4) + full_network_suffix() +"<br/>"+
-                                                 "<b>Betweenness:</b> "+ parseFloat(d.betwness).toFixed(4) +"<br/>"+
                                                  "<b>Eigenvector:</b> "+ parseFloat(d.eign).toFixed(4) + full_network_suffix() +
                                                  featureLine )
                                         .style("left", (event.pageX) + "px")
