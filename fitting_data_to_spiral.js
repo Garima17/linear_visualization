@@ -1044,9 +1044,7 @@ function draw_spiral_community(){
 
 
 
-  //find_node_id does not work with most connected node data functonality
-  if (most_connected_nodes_data)
-    find_node_id =-1
+  // Find Node and Most Connected turn each other off in settings.js
   console.log(find_node_id)
 
   g.selectAll(".brush").remove()

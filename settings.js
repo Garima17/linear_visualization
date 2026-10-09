@@ -10,6 +10,7 @@ let flag_community_connections=0
 
 //community ranking
 function Community_ranking_size(){
+  turnOffMostConnected()
   let height = 1200
   let width =1200
   let prepare_data = []
@@ -84,6 +85,7 @@ console.log(number_of_community_connections_data)
 }
 //
 function Community_ranking_degree(){
+  turnOffMostConnected()
   flag_community_size =0
   flag_community_degree =1
   flag_community_density=0
@@ -140,6 +142,7 @@ function Community_ranking_degree(){
   d3.select("#community_ranking_tooltip").html("<b>Community Ranking:</b> Heighest Degree ")
 }
 function Community_ranking_density(){
+  turnOffMostConnected()
   flag_community_size =0
   flag_community_degree =0
   flag_community_density=1
@@ -196,6 +199,7 @@ function Community_ranking_density(){
   d3.select("#community_ranking_tooltip").html("<b>Community Ranking:</b> Edge-Density ")
 }
 function Community_ranking_connection(){
+  turnOffMostConnected()
   flag_community_size =0
   flag_community_degree =0
   flag_community_density=0
@@ -258,6 +262,18 @@ function Community_ranking_connection(){
 //most connected node identification
 //degree range_bar
 function MostConnectedNodes(val) {
+  // one mode at a time: Most Connected clears Find Node
+  find_node_id = -1
+  setInputValue('textInputNodeId', '')
+
+  // slider at 0 means Most Connected is off
+  if (+val === 0) {
+    turnOffMostConnected()
+    g.select(".brush").call(brush.move, null);
+    draw_spiral_community()
+    return
+  }
+
   //first set the flag
   flag_most_connected_nodes = 1
   document.getElementById('textInputConnecteddeg').value=val;
@@ -300,6 +316,7 @@ function MostConnectedNodes(val) {
 //ranking button
 //ranking based on degree
 function degree_ranking(){
+  turnOffMostConnected()
   let height = 1200
   let width =1200
   let prepare_data = []
@@ -344,6 +361,7 @@ function degree_ranking(){
 
 // ranking based on closeness
 function closeness_ranking(){
+  turnOffMostConnected()
   let height = 1200
   let width =1200
   let prepare_data = []
@@ -385,6 +403,7 @@ function closeness_ranking(){
 
 //ranking based on eign centrality
 function eign_ranking(){
+  turnOffMostConnected()
   let height = 1200
   let width =1200
   let prepare_data = []
@@ -426,6 +445,7 @@ function eign_ranking(){
 
 //ranking based on betweenness centrality
 function between_ranking(){
+  turnOffMostConnected()
   let height = 1200
   let width =1200
   let prepare_data = []
@@ -480,6 +500,7 @@ function updateTextInputRadius(val) {
 
 //degree range_bar
 function updateTextInputdeg(val) {
+  turnOffMostConnected()
     document.getElementById('textInputdeg').value=val;
     density_var = val;
     console.log(val)
@@ -498,6 +519,7 @@ function updateTextInputdeg(val) {
 
   //betweenness range_bar
   function updateTextInputbet(val) {
+    turnOffMostConnected()
     document.getElementById('textInputbet').value=val;
     betweenness_var = val
     global_data = global_data_unchanged.filter(function(d){
@@ -514,6 +536,7 @@ function updateTextInputdeg(val) {
 
   //eign range_bar
   function updateTextInputeig(val) {
+    turnOffMostConnected()
     document.getElementById('textInputeig').value=val;
     eign_var = val ;
     global_data = global_data_unchanged.filter(function(d){
@@ -528,6 +551,7 @@ function updateTextInputdeg(val) {
   }
 //closeness range_bar
   function updateTextInputclo(val) {
+    turnOffMostConnected()
     document.getElementById('textInputclo').value=val;
     closeness_var =val
     global_data = global_data_unchanged.filter(function(d){
@@ -543,6 +567,7 @@ function updateTextInputdeg(val) {
 
 //colorcoding
 function colorNodesByDensity(){
+  turnOffMostConnected()
    densityColFlag = 1
    degreeColFlag = 0
    closenessColFlag = 0
@@ -554,6 +579,7 @@ function colorNodesByDensity(){
 }
 
 function colorNodesByDegree(){
+  turnOffMostConnected()
   densityColFlag = 0
   degreeColFlag = 1
   closenessColFlag = 0
@@ -565,6 +591,7 @@ function colorNodesByDegree(){
 }
 
 function colorNodesByCloseness(){
+  turnOffMostConnected()
   densityColFlag = 0
   degreeColFlag = 0
   closenessColFlag = 1
@@ -576,6 +603,7 @@ function colorNodesByCloseness(){
 }
 
 function colorNodesByBetweeness(){
+  turnOffMostConnected()
   densityColFlag = 0
   degreeColFlag = 0
   closenessColFlag = 0
@@ -587,6 +615,7 @@ function colorNodesByBetweeness(){
 }
 
 function colorNodesByEign(){
+  turnOffMostConnected()
   densityColFlag = 0
   degreeColFlag = 0
   closenessColFlag = 0
@@ -608,7 +637,17 @@ function colorNodesByEign(){
     node_closeness,
     node_eign;
 
-    find_node_id = document.getElementById('textInputNodeId').value
+    var input_text = document.getElementById('textInputNodeId').value.trim()
+    var searched_node = /^\d+$/.test(input_text) ? +input_text : null
+    var node_exists = searched_node !== null && global_data_unchanged.some(function(d){ return d.node == searched_node })
+    if (!node_exists){
+      showStatusMessage(input_text === '' ? 'Enter a node ID' : 'Node ' + input_text + ' not found', 'warning')
+      return
+    }
+
+    // one mode at a time: finding a node turns Most Connected off
+    turnOffMostConnected()
+    find_node_id = searched_node
     g.select(".brush").call(brush.move, null);
     draw_spiral_community()
 
@@ -690,23 +729,33 @@ function colorNodesByEign(){
     if (el) el.value = value
   }
 
-  // brief on-screen confirmation that the reset happened
-  var resetMessageTimer
-  function showResetMessage(){
-    var el = document.getElementById('reset_message')
+  // brief on-screen message, e.g. "View reset" (success) or "Node 99999 not found" (warning)
+  var statusMessageTimer
+  function showStatusMessage(text, variant){
+    var el = document.getElementById('status_message')
     if (!el){
       el = document.createElement('div')
-      el.id = 'reset_message'
+      el.id = 'status_message'
       el.setAttribute('role', 'status')
       el.setAttribute('aria-live', 'polite')
-      el.className = 'alert alert-success py-1 px-3 shadow-sm'
       el.style.cssText = 'position:fixed; top:64px; left:50%; transform:translateX(-50%); z-index:2000; margin:0; display:none;'
       document.body.appendChild(el)
     }
-    el.textContent = 'View reset'
+    el.className = 'alert alert-' + (variant || 'success') + ' py-1 px-3 shadow-sm'
+    el.textContent = text
     el.style.display = 'block'
-    clearTimeout(resetMessageTimer)
-    resetMessageTimer = setTimeout(function(){ el.style.display = 'none' }, 2000)
+    clearTimeout(statusMessageTimer)
+    statusMessageTimer = setTimeout(function(){ el.style.display = 'none' }, 2500)
+  }
+
+  // Most Connected and Find Node are used one at a time, and any other control
+  // (colour, filter, ranking, view) also ends Most Connected mode
+  function turnOffMostConnected(){
+    if (flag_most_connected_nodes) global_data = global_data_unchanged
+    flag_most_connected_nodes = 0
+    most_connected_nodes_data = undefined
+    setInputValue('MostConnected', 0)
+    setInputValue('textInputConnecteddeg', 0)
   }
 
   //reset button: restore the exact page-load view
@@ -748,8 +797,7 @@ function colorNodesByEign(){
 
     //find node and most connected nodes
     find_node_id = -1
-    flag_most_connected_nodes = 0
-    most_connected_nodes_data = undefined
+    turnOffMostConnected()
 
     //color-coding back to density
     densityColFlag = 1
@@ -766,8 +814,6 @@ function colorNodesByEign(){
 
     //sidebar controls (sliders get '0', never '' which jumps to the midpoint)
     setInputValue('textInputNodeId', '')
-    setInputValue('textInputConnecteddeg', 0)
-    setInputValue('MostConnected', 0)
     setInputValue('textInputdeg', 0)
     setInputValue('Degree', 0)
     setInputValue('textInputclo', 0)
@@ -831,7 +877,7 @@ function colorNodesByEign(){
     table.selectAll("tr").remove()
     show_table_data(global_data)
 
-    showResetMessage()
+    showStatusMessage('View reset', 'success')
   }
 
   // Community filter: show only selected communities
@@ -857,6 +903,8 @@ function colorNodesByEign(){
       alert("No nodes found in the specified communities.");
       return;
     }
+
+    turnOffMostConnected();
 
     // Filter community ranking data to only include selected communities
     var filtered_community_size = community_size_data.filter(function(d) {
@@ -909,6 +957,7 @@ function colorNodesByEign(){
 
   // Reset community filter
   function resetCommunityFilter() {
+    turnOffMostConnected()
     document.getElementById('textInputCommunityFilter').value = '';
     global_data = global_data_unchanged;
     
@@ -997,6 +1046,8 @@ function applyCommunityRangeFilter() {
     return;
   }
 
+  turnOffMostConnected();
+
   console.log("Community range filter — passing communities:", passingCommunities);
 
   let height = 1200;
@@ -1048,6 +1099,7 @@ function applyCommunityRangeFilter() {
 }
 
 function resetCommunityRangeFilter() {
+  turnOffMostConnected()
   document.getElementById('commRangeMinSize').value = '0';
   if(document.getElementById('commRangeMinSizeText')) document.getElementById('commRangeMinSizeText').value = '0';
   document.getElementById('commRangeMinDensity').value = '0';
@@ -1214,6 +1266,8 @@ function switchCommunityView(mode) {
       number_of_community_connections_data = original_number_of_community_connections_data.slice();
     }
   }
+
+  turnOffMostConnected();
 
   // Rebuild positions
   var height = 1200;
