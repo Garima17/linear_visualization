@@ -589,6 +589,30 @@ function link_end_id(end){
   return (end !== null && typeof end === "object") ? end.id : end
 }
 
+// ============================================================
+// Inter-community arcs: an arc diagram in a left margin of the linear view,
+// one arc per pair of connected communities, thickness = edges between them
+// ============================================================
+var ARC_MARGIN = 120               // px reserved left of the community circles
+var ARC_COLOUR = "#9aa0a6"
+var ARC_HIGHLIGHT = "#762a83"      // purple: not used by the node colour scales
+var show_background_arcs = true    // toggled by "Show/hide community links"
+
+function reset_community_arcs(){
+  d3.selectAll(".community_arcs path")
+    .attr("stroke", ARC_COLOUR)
+    .attr("stroke-opacity", show_background_arcs ? 0.25 : 0)
+}
+
+// arcs of `community` stand out; all others fade
+function highlight_community_arcs(community){
+  var touches = function(d){ return d.a == community || d.b == community }
+  d3.selectAll(".community_arcs path")
+    .attr("stroke", function(d){ return touches(d) ? ARC_HIGHLIGHT : ARC_COLOUR })
+    .attr("stroke-opacity", function(d){ return touches(d) ? 0.9 : (show_background_arcs ? 0.05 : 0) })
+    .filter(touches).raise()
+}
+
 // draw spiral in side window on click community
 function draw_coarse_graph_in_side_window( adjacent_nodes, activeNode){
 console.log("inside_coarse")
@@ -912,7 +936,7 @@ function computing_spiral_positions(center_positions_spiral, data_points, sides,
 
   let waveangle = 0.314;
 
-  let initial_x = 60
+  let initial_x = 60 + ARC_MARGIN // the arc margin sits left of the community axis
   let initial_y = 60
   let x_increment = 0
  
@@ -1594,7 +1618,7 @@ var legendaxis = d3.axisRight()
     .attr("width", (legendwidth) + "px")
     //.attr("translate", "transform(750, 0)")
     .style("position", "absolute")
-    .style("left", "790px")
+    .style("left", (790 + ARC_MARGIN) + "px")
     .style("top", margin.top)
   
 
@@ -1604,7 +1628,7 @@ var legendaxis = d3.axisRight()
 g
   .append("g")
   .attr("class", "axis")
-  .attr("transform", "translate(800, "+margin.top+")")
+  .attr("transform", "translate(" + (800 + ARC_MARGIN) + ", "+margin.top+")")
   //.attr("transform", "translate(" + (legendwidth - margin.left - margin.right + 3) + "," + (margin.top) + ")")
   .call(legendaxis);
 
@@ -1627,7 +1651,7 @@ g
   .text(text_for_legend)
   //.attr("transform", "translate")
   //.attr("class", "axis")
-  .attr("transform", "translate( 770 ," + (legendheight+10) + ")")
+  .attr("transform", "translate(" + (770 + ARC_MARGIN) + " ," + (legendheight+10) + ")")
   //.call(legendaxis);
 
 //g.append
@@ -1640,7 +1664,7 @@ let community_scale = d3.scaleOrdinal()
 let community_axis = d3.axisLeft(community_scale)
 
 g.append("g")
-.attr("transform", "translate(50,0)")
+.attr("transform", "translate(" + (50 + ARC_MARGIN) + ",0)")
 .call(community_axis)
 
 g.append("text")
@@ -1669,8 +1693,11 @@ d3.selectAll("mylinks").remove()
 // Use the computed height from community layout, with a minimum of 700
 let height = Math.max(700, computed_total_community_height || 700)
 let width =1200
+// one community-axis layer only: earlier redraws would otherwise stack copies (and darken the arcs)
+d3.select("#chart").selectAll("svg.community_axis_layer").remove()
 var svg = d3.select("#chart")
   .append("svg")
+    .attr("class", "community_axis_layer")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -1690,6 +1717,36 @@ var y = d3.scaleOrdinal()
 .range([0, height])
 .domain(allNodes)*/
 
+// inter-community arcs (under the circles): connected pairs of communities on the axis,
+// self-loops and communities hidden by a filter are skipped
+var circle_x = 17 + ARC_MARGIN
+var arc_x = circle_x - 9                      // left edge of the circles
+var arc_data = []
+coarse_graph.links.forEach(function(l){
+  var a = link_end_id(l.source), b = link_end_id(l.target)
+  if (a != b && domain_for_community_legend.includes(a) && domain_for_community_legend.includes(b))
+    arc_data.push({a: a, b: b, weight: +l.WEIGHT})
+})
+var arc_weights = d3.extent(arc_data, function(d){ return d.weight })
+var arc_width = d3.scaleLog().domain(arc_weights[0] === arc_weights[1] ? [1, arc_weights[1] + 1] : arc_weights).range([0.5, 4]).clamp(true)
+svg.append("g")
+  .attr("class", "community_arcs")
+  .style("pointer-events", "none")
+  .selectAll("path")
+  .data(arc_data)
+  .enter()
+  .append("path")
+    .attr("d", function(d){
+      var y1 = Math.min(y(d.a), y(d.b)), y2 = Math.max(y(d.a), y(d.b))
+      var ry = (y2 - y1) / 2
+      var rx = Math.min(ry, ARC_MARGIN - 4)   // long links stay inside the margin
+      // from the upper circle to the lower one, bulging left (sweep 0)
+      return "M" + arc_x + "," + y1 + " A" + rx + "," + ry + " 0 0,0 " + arc_x + "," + y2
+    })
+    .attr("fill", "none")
+    .attr("stroke-width", function(d){ return arc_width(d.weight) })
+reset_community_arcs()
+
 // Add the circle for the nodes
 let coarse_graph_nodes = svg
 .selectAll("mynodes")
@@ -1699,7 +1756,7 @@ let coarse_graph_nodes = svg
 .append("g")
 .attr("class", "comm_nodes")
 .append("circle")
-  .attr("cx", 17)
+  .attr("cx", circle_x)
   .attr("cy", function(d){ return(y(d.id))})
   .attr("r", 9)
   .style("fill", "#69b3a2")
@@ -1743,6 +1800,7 @@ coarse_graph_links = svg
     // Add the highlighting functionality
     coarse_graph_nodes.on('mouseover', function (e,d) {
       activeCommunity = d.id
+      highlight_community_arcs(d.id)
       console.log(d)
       adjacent_community = community_connections_list[d.id]
 
@@ -1788,6 +1846,7 @@ coarse_graph_links = svg
         //.style('stroke-width', function (link_d) { return link_d.source === d.id || link_d.target === d.id ? 4 : 1;})
     })
     .on('mouseout', function (d) {
+       reset_community_arcs()
        d3.selectAll("circle")
         .attr("opacity", 1)
       //nodes.style('fill', "#69b3a2")

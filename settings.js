@@ -498,17 +498,10 @@ function colorNodesByEign(){
 
 
 //show and hide edges button
+  // show / hide the inter-community arcs (hovering a community still shows its own arcs)
   function edge_visualization(){
-    let opa =d3.selectAll(".spiral_edges").style("stroke-opacity")
-    //console.log(active_community)
-    if (opa ==1){
-      d3.selectAll(".spiral_edges")
-      .style("stroke-opacity", 0)
-    }else{
-      d3.selectAll(".spiral_edges")
-      .style("stroke-opacity", 1)
-
-    }
+    show_background_arcs = !show_background_arcs
+    reset_community_arcs()
   }
 
 
