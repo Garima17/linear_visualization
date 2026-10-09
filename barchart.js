@@ -102,7 +102,9 @@
       .attr("y", function (d) { return y(d.y); })
       .attr("width", x.bandwidth())
       .attr("height", function (d) { return height - y(d.y); })
-      .on("mouseover", function(event, d) {
+      .style("cursor", "pointer")
+      .on("click", function(event, d) {
+         clear_selection()
          activeCommunity = d.x
          adjacent_community = community_connections_list[activeCommunity]
 
@@ -151,21 +153,6 @@
 
         })
 
-      .on("mouseout", function() {
-
-        d3.selectAll(".barLight")
-        .attr("class", "bar");
-
-        d3.selectAll(".strokechange")
-        .attr("class", "heat_map")
-
-        d3.selectAll("circle")
-        .attr("opacity", 1)
-
-        d3.selectAll(".spiral_edges").style("stroke-opacity", 1)
-        console.log(d3.selectAll(".spiral_edges").style("stroke-opacity"))
-
-      })
 
     // UPDATE
     bars.attr("x", function (d) { return x(d.x); })
