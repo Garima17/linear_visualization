@@ -65,7 +65,7 @@ function draw_textbox(data, adjacent_nodes, activeNode, count, deg, bet, clo, ei
   // Build node feature string conditionally
   var featureHtml = "";
   if (Object.keys(nodeFeatureLookup).length > 0) {
-    var colLabel = nodeFeatureColumnName ? (nodeFeatureColumnName.charAt(0).toUpperCase() + nodeFeatureColumnName.slice(1).replace(/_/g, ' ')) : "Feature";
+    var colLabel = feature_column_label();
     var fieldVal = nodeFeatureLookup.hasOwnProperty(activeNode) ? nodeFeatureLookup[activeNode] : -1;
     // For mapping like CS fields, use FIELD_NAMES if present, else just show the raw value.
     var fieldName = typeof FIELD_NAMES !== 'undefined' && FIELD_NAMES.hasOwnProperty(fieldVal) ? FIELD_NAMES[fieldVal] : (fieldVal === -1 ? "Unknown" : fieldVal);
@@ -77,11 +77,11 @@ function draw_textbox(data, adjacent_nodes, activeNode, count, deg, bet, clo, ei
 
   // append the svg object to the body of the page
   var svg = d3.select("#node_textbox")
-      .html("<b>Node of interest: </b>"+ activeNode +"<br/>" + featureHtml +"<b>Degree: </b>"+ deg + degree_label_suffix(active_node_obj) +"<br/>" +"<b>Closeness: </b>"+ clo + full_network_suffix() +"<br/>" +"<b>Eigen: </b>"+ eig + full_network_suffix() +"<br/>" + "<br/>"
+      .html("<b>Node: </b>"+ activeNode +"<br/>" + featureHtml +"<b>Degree: </b>"+ deg + degree_label_suffix(active_node_obj) +"<br/>" +"<b>Closeness: </b>"+ clo + full_network_suffix() +"<br/>" +"<b>Eigenvector: </b>"+ eig + full_network_suffix() +"<br/>" + "<br/>"
        + "<b>Total edges:</b> " + adjacent_nodes.length + "<br/>" +
-       "<b>Intra-community node-to-node edges:</b> " + count + "<br/>" +
-       "<b>Inter-community node-to-node edges:</b> " + inter_community_connections + "<br/>" +
-       "<b>List of Adjacent nodes:</b> " + adjacent_nodes+"<br/>"+"<br/>")
+       "<b>Edges within its community:</b> " + count + "<br/>" +
+       "<b>Edges to other communities:</b> " + inter_community_connections + "<br/>" +
+       "<b>Neighbor nodes:</b> " + adjacent_nodes+"<br/>"+"<br/>")
        .style("font-size", "17px")
 
 }
@@ -133,9 +133,9 @@ function draw_textbox_community_connections(){
   // append the svg object to the body of the page
   var svg = d3.select("#community_textbox")
       .html("<b>Community: </b>"+ "<b>"+activeCommunity +"</b>" +
-      "<br/>" +"<b>Number_of_node: </b>"+"<b>"+display_size +"</b>"+
-      "<br/>" +"<b>Edge_density: </b>"+"<b>"+ display_density +"</b>"+
-      "<br/>" + "<br/>" + "<b>Community Connections:</b> "+  "<br/>" )
+      "<br/>" +"<b>Size (nodes): </b>"+"<b>"+display_size +"</b>"+
+      "<br/>" +"<b>Edge density: </b>"+"<b>"+ display_density +"</b>"+
+      "<br/>" + "<br/>" + "<b>Edges between communities:</b> "+  "<br/>" )
        .style("font-size", "18px")
        
       
@@ -207,16 +207,14 @@ function draw_community_feature_barchart(communityId) {
   if (chartHeight > maxHeight) chartHeight = maxHeight;
 
   // Title
-  var featureLabel = nodeFeatureColumnName
-    ? nodeFeatureColumnName.replace(/_/g, ' ')
-    : "Node Type";
+
   d3.select("#community_barchart")
     .append("div")
     .style("font-size", "14px")
     .style("font-weight", "bold")
     .style("margin-bottom", "4px")
     .style("margin-top", "8px")
-    .text(featureLabel.charAt(0).toUpperCase() + featureLabel.slice(1) + " Distribution");
+    .text(feature_column_label() + " distribution");
 
   // Color scale
   var barColors = [
@@ -1231,13 +1229,13 @@ console.log(global_data)
                                         // metadata line: the dataset's own feature column (as in the details panel); none without metadata
                                         var featureLine = "";
                                         if (Object.keys(nodeFeatureLookup).length > 0) {
-                                          var colLabel = nodeFeatureColumnName ? (nodeFeatureColumnName.charAt(0).toUpperCase() + nodeFeatureColumnName.slice(1).replace(/_/g, ' ')) : "Feature";
+                                          var colLabel = feature_column_label();
                                           var fieldVal = nodeFeatureLookup.hasOwnProperty(d.node) ? nodeFeatureLookup[d.node] : -1;
                                           var fieldName = FIELD_NAMES.hasOwnProperty(fieldVal) ? FIELD_NAMES[fieldVal] : (fieldVal === -1 ? "Unknown" : fieldVal);
                                           featureLine = "<br/><b>" + colLabel + ":</b> " + fieldName;
                                         }
                                         div.html("<b>Node:</b> "+ d.node +"<br/>" +"<b>Community:</b> " +d.community+ "<br/>"+
-                                                 "<b>Degree:</b> "+ parseFloat(d.centrality).toFixed(2) + degree_label_suffix(d) +"<br/>"+
+                                                 "<b>Degree:</b> "+ d.centrality + degree_label_suffix(d) +"<br/>"+
                                                  "<b>Closeness:</b> "+ parseFloat(d.closeness).toFixed(4) + full_network_suffix() +"<br/>"+
                                                  "<b>Eigenvector:</b> "+ parseFloat(d.eign).toFixed(4) + full_network_suffix() +
                                                  featureLine )
@@ -1612,15 +1610,15 @@ g
 
   var text_for_legend;
   if (densityColFlag ==1)
-  text_for_legend = "Density";
+  text_for_legend = "Edge density";
   else if (degreeColFlag==1)
   text_for_legend =  "Degree";
   else if (closenessColFlag==1)
   text_for_legend=  "Closeness";
   else if (betweennessColFlag==1)
-  text_for_legend =  "Betweeness";
+  text_for_legend =  "Betweenness";
   else if (eignColFlag==1)
-  text_for_legend = "Eigen";
+  text_for_legend = "Eigenvector";
 
   g
   .append("g")

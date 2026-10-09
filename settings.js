@@ -204,7 +204,7 @@ function Community_ranking_size(){
   community_ranking_key = 'size'
   relayout()
   apply_node_filters()
-  d3.select("#community_ranking_tooltip").html("<b>Community Ranking:</b> Size ")
+  d3.select("#community_ranking_tooltip").html("<b>Community ranking:</b> Size ")
 }
 
 function Community_ranking_degree(){
@@ -212,7 +212,7 @@ function Community_ranking_degree(){
   community_ranking_key = 'degree'
   relayout()
   apply_node_filters()
-  d3.select("#community_ranking_tooltip").html("<b>Community Ranking:</b> Heighest Degree ")
+  d3.select("#community_ranking_tooltip").html("<b>Community ranking:</b> Max degree ")
 }
 
 function Community_ranking_density(){
@@ -220,7 +220,7 @@ function Community_ranking_density(){
   community_ranking_key = 'density'
   relayout()
   apply_node_filters()
-  d3.select("#community_ranking_tooltip").html("<b>Community Ranking:</b> Edge-Density ")
+  d3.select("#community_ranking_tooltip").html("<b>Community ranking:</b> Edge density ")
 }
 
 function Community_ranking_connection(){
@@ -228,7 +228,7 @@ function Community_ranking_connection(){
   community_ranking_key = 'connections'
   relayout()
   apply_node_filters()
-  d3.select("#community_ranking_tooltip").html("<b>Community Ranking:</b> Community Connections ")
+  d3.select("#community_ranking_tooltip").html("<b>Community ranking:</b> Connections ")
 }
 
 
@@ -282,7 +282,7 @@ function rank_nodes_by(key, label){
   node_ranking_key = key
   relayout()
   apply_node_filters()
-  d3.select("#ranking_tooltip").html("<b>Ranking:</b> " + label + " ")
+  d3.select("#ranking_tooltip").html("<b>Node ranking:</b> " + label + " ")
 }
 
 //ranking based on degree
@@ -297,7 +297,7 @@ function closeness_ranking(){
 
 //ranking based on eign centrality
 function eign_ranking(){
-  rank_nodes_by('eign', 'Eigen Centrality')
+  rank_nodes_by('eign', 'Eigenvector')
 }
 
 //ranking based on betweenness centrality
@@ -360,7 +360,7 @@ function colorNodesByDensity(){
    eignColFlag = 0
    g.select(".brush").call(brush.move, null);
    draw_spiral_community()
-   d3.select("#color_tooltip").html("<b>Color-Coding:</b> Density ")
+   d3.select("#color_tooltip").html("<b>Color:</b> Edge density ")
 }
 
 function colorNodesByDegree(){
@@ -372,7 +372,7 @@ function colorNodesByDegree(){
   eignColFlag = 0
   g.select(".brush").call(brush.move, null);
   draw_spiral_community()
-  d3.select("#color_tooltip").html("<b>Color-Coding:</b> Degree ")
+  d3.select("#color_tooltip").html("<b>Color:</b> Degree ")
 }
 
 function colorNodesByCloseness(){
@@ -384,7 +384,7 @@ function colorNodesByCloseness(){
   eignColFlag = 0
   g.select(".brush").call(brush.move, null);
   draw_spiral_community()
-  d3.select("#color_tooltip").html("<b>Color-Coding:</b> Closeness ")
+  d3.select("#color_tooltip").html("<b>Color:</b> Closeness ")
 }
 
 function colorNodesByBetweeness(){
@@ -396,7 +396,7 @@ function colorNodesByBetweeness(){
   eignColFlag = 0
   g.select(".brush").call(brush.move, null);
   draw_spiral_community()
-  d3.select("#color_tooltip").html("<b>Color-Coding:</b> Betweenness ")
+  d3.select("#color_tooltip").html("<b>Color:</b> Betweenness ")
 }
 
 function colorNodesByEign(){
@@ -408,7 +408,7 @@ function colorNodesByEign(){
   eignColFlag = 1
   g.select(".brush").call(brush.move, null);
   draw_spiral_community()
-  d3.select("#color_tooltip").html("<b>Color-Coding:</b> Eigen Centrality ")
+  d3.select("#color_tooltip").html("<b>Color:</b> Eigenvector ")
 
 }
 
@@ -474,18 +474,18 @@ function colorNodesByEign(){
   // append the svg object to the body of the page
     var featureHtml = "";
     if (Object.keys(nodeFeatureLookup).length > 0) {
-      var colLabel = nodeFeatureColumnName ? (nodeFeatureColumnName.charAt(0).toUpperCase() + nodeFeatureColumnName.slice(1).replace(/_/g, ' ')) : "Feature";
+      var colLabel = feature_column_label();
       var fieldVal = nodeFeatureLookup.hasOwnProperty(+find_node_id) ? nodeFeatureLookup[+find_node_id] : -1;
       var fieldName = typeof FIELD_NAMES !== 'undefined' && FIELD_NAMES.hasOwnProperty(fieldVal) ? FIELD_NAMES[fieldVal] : (fieldVal === -1 ? "Unknown" : fieldVal);
       featureHtml = "<b>" + colLabel + ":</b> " + fieldName + "<br/>";
     }
 
     var svg = d3.select("#node_textbox")
-      .html("<br/><b>NODE DATA</b><br/><b>Community: </b>"+ node_community +"<br/>" + 
+      .html("<br/><b>Found node:</b> " + find_node_id + "<br/><b>Community: </b>"+ node_community +"<br/>" + 
       featureHtml +
       "<b>Degree:</b> "+ node_centrality + degree_label_suffix(found_node) + "<br/>" +
        "<b>Closeness:</b> " + node_closeness + full_network_suffix() + "<br/>" +
-       "<b>Eign:</b> " + node_eign + full_network_suffix() )
+       "<b>Eigenvector:</b> " + node_eign + full_network_suffix() )
        .style("font-size", "12px")
     //highlight the node in table also
     //introduce the reset button to reset the entire visualization again
@@ -750,7 +750,7 @@ function switchCommunityView(mode) {
   if (mode === 'metadata') {
     // Check if nodeFeatureLookup has data
     if (!nodeFeatureLookup || Object.keys(nodeFeatureLookup).length === 0) {
-      alert("No metadata available for this dataset. Node features CSV may not be loaded.");
+      showStatusMessage("Metadata groups are not available for this dataset", "warning");
       community_view_mode = 'louvain';
       return;
     }

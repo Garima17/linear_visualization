@@ -209,15 +209,15 @@
             <!-- Ranking Nodes -->
             <li>
               <a class="nav-link px-3 sidebar-link" data-bs-toggle="collapse" href="#rankingNodes">
-                <span>Ranking Nodes</span>
+                <span>Rank Nodes By</span>
                 <span class="ms-auto"><span class="right-icon"><i class="bi bi-chevron-down"></i></span></span>
               </a>
               <div class="collapse" id="rankingNodes">
                 <ul class="navbar-nav ps-3">
-                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="degree_ranking()" type="button">Degree Centrality</button></li>
-                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="closeness_ranking()" type="button">Closeness Centrality</button></li>
-                  <li class="d-none"><button class="btn btn-sm btn-outline-secondary mb-1" onclick="between_ranking()" type="button">Betweenness Centrality</button></li>
-                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="eign_ranking()" type="button">Eign Centrality</button></li>
+                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="degree_ranking()" type="button">Degree</button></li>
+                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="closeness_ranking()" type="button">Closeness</button></li>
+                  <li class="d-none"><button class="btn btn-sm btn-outline-secondary mb-1" onclick="between_ranking()" type="button">Betweenness</button></li>
+                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="eign_ranking()" type="button">Eigenvector</button></li>
                 </ul>
               </div>
             </li>
@@ -225,15 +225,15 @@
             <!-- Ranking Communities -->
             <li>
               <a class="nav-link px-3 sidebar-link" data-bs-toggle="collapse" href="#rankingCommunities">
-                <span>Ranking Communities</span>
+                <span>Rank Communities By</span>
                 <span class="ms-auto"><span class="right-icon"><i class="bi bi-chevron-down"></i></span></span>
               </a>
               <div class="collapse" id="rankingCommunities">
                 <ul class="navbar-nav ps-3">
                   <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="Community_ranking_size()" type="button">Size</button></li>
-                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="Community_ranking_density()" type="button">Highest Density</button></li>
-                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="Community_ranking_degree()" type="button">Highest Degree</button></li>
-                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="Community_ranking_connection()" type="button">Community Connections</button></li>
+                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="Community_ranking_density()" type="button">Edge density</button></li>
+                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="Community_ranking_degree()" type="button">Max degree</button></li>
+                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="Community_ranking_connection()" type="button">Connections</button></li>
                 </ul>
               </div>
             </li>
@@ -241,16 +241,16 @@
             <!-- Color-Coding -->
             <li>
               <a class="nav-link px-3 sidebar-link" data-bs-toggle="collapse" href="#colorCoding">
-                <span>Color-Coding</span>
+                <span>Color Nodes By</span>
                 <span class="ms-auto"><span class="right-icon"><i class="bi bi-chevron-down"></i></span></span>
               </a>
               <div class="collapse" id="colorCoding">
                 <ul class="navbar-nav ps-3">
-                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByDensity()" type="button">Density</button></li>
+                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByDensity()" type="button">Edge density</button></li>
                   <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByDegree()" type="button">Degree</button></li>
                   <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByCloseness()" type="button">Closeness</button></li>
                   <li class="d-none"><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByBetweeness()" type="button">Betweenness</button></li>
-                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByEign()" type="button">Eign</button></li>
+                  <li><button class="btn btn-sm btn-outline-secondary mb-1" onclick="colorNodesByEign()" type="button">Eigenvector</button></li>
                 </ul>
               </div>
             </li>
@@ -258,7 +258,7 @@
             <!-- Filter Communities -->
             <li>
               <a class="nav-link px-3 sidebar-link" data-bs-toggle="collapse" href="#communityFilter">
-                <span>Filter Communities</span>
+                <span>Filter Communities by ID</span>
                 <span class="ms-auto"><span class="right-icon"><i class="bi bi-chevron-down"></i></span></span>
               </a>
               <div class="collapse" id="communityFilter">
@@ -269,7 +269,7 @@
                   </li>
                   <li class="mt-2">
                     <button class="btn btn-sm btn-outline-secondary me-1" onclick="applyCommunityFilter()" type="button">Apply</button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="resetCommunityFilter()" type="button">Reset</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="resetCommunityFilter()" type="button">Clear filter</button>
                   </li>
                 </ul>
               </div>
@@ -284,24 +284,24 @@
               <div class="collapse" id="communityRangeFilter">
                 <ul class="navbar-nav ps-3" style="font-size:11px">
                                     <li>
-                    <label class="form-label text-white">Size >= <input type="text" id="commRangeMinSizeText" value="0" class="text-white bg-dark text-center" size="5"></label>
+                    <label class="form-label text-white">Size &ge; <input type="text" id="commRangeMinSizeText" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max="5000" id="commRangeMinSize" onchange="document.getElementById('commRangeMinSizeText').value=this.value" value="0">
                   </li>
                   <li>
-                    <label class="form-label text-white">Density >= <input type="text" id="commRangeMinDensityText" value="0" class="text-white bg-dark text-center" size="5"></label>
+                    <label class="form-label text-white">Edge density &ge; <input type="text" id="commRangeMinDensityText" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max="1" step="0.01" id="commRangeMinDensity" onchange="document.getElementById('commRangeMinDensityText').value=this.value" value="0">
                   </li>
                   <li>
-                    <label class="form-label text-white">Max Degree >= <input type="text" id="commRangeMinDegreeText" value="0" class="text-white bg-dark text-center" size="5"></label>
+                    <label class="form-label text-white">Max degree &ge; <input type="text" id="commRangeMinDegreeText" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max="5000" id="commRangeMinDegree" onchange="document.getElementById('commRangeMinDegreeText').value=this.value" value="0">
                   </li>
                   <li>
-                    <label class="form-label text-white">Connections >= <input type="text" id="commRangeMinConnText" value="0" class="text-white bg-dark text-center" size="5"></label>
+                    <label class="form-label text-white">Connections &ge; <input type="text" id="commRangeMinConnText" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max="5000" id="commRangeMinConn" onchange="document.getElementById('commRangeMinConnText').value=this.value" value="0">
                   </li>
                   <li class="mt-2">
                     <button class="btn btn-sm btn-outline-secondary me-1" onclick="applyCommunityRangeFilter()" type="button">Apply</button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="resetCommunityRangeFilter()" type="button">Reset</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="resetCommunityRangeFilter()" type="button">Clear filter</button>
                   </li>
                 </ul>
               </div>
@@ -310,25 +310,25 @@
             <!-- Filtering Nodes -->
             <li>
               <a class="nav-link px-3 sidebar-link" data-bs-toggle="collapse" href="#filteringNodes">
-                <span>Filtering Nodes</span>
+                <span>Filter Nodes</span>
                 <span class="ms-auto"><span class="right-icon"><i class="bi bi-chevron-down"></i></span></span>
               </a>
               <div class="collapse" id="filteringNodes">
                 <ul class="navbar-nav ps-3">
                   <li>
-                    <label class="form-label text-white">Degree >= <input type="text" id="textInputdeg" value="0" class="text-white bg-dark text-center" size="5"></label>
+                    <label class="form-label text-white">Degree &ge; <input type="text" id="textInputdeg" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max="500" id="Degree" onchange="updateTextInputdeg(this.value)" value="0">
                   </li>
                   <li>
-                    <label class="form-label text-white">Closeness>= <input type="text" id="textInputclo" value="0" class="text-white bg-dark text-center" size="5"></label>
+                    <label class="form-label text-white">Closeness &ge; <input type="text" id="textInputclo" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max="1" step=".1" id="Closeness" onchange="updateTextInputclo(this.value)" value="0">
                   </li>
                   <li>
-                    <label class="form-label text-white">Eign>= <input type="text" id="textInputeig" value="0" class="text-white bg-dark text-center" size="5"></label>
+                    <label class="form-label text-white">Eigenvector &ge; <input type="text" id="textInputeig" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max=".1" step=".01" id="Eign" onchange="updateTextInputeig(this.value)" value="0">
                   </li>
                   <li class="d-none"><!-- betweenness not computed yet (kept 0) -->
-                    <label class="form-label text-white">Betweenness>= <input type="text" id="textInputbet" value="0" class="text-white bg-dark text-center" size="5"></label>
+                    <label class="form-label text-white">Betweenness &ge; <input type="text" id="textInputbet" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max="1" step=".1" id="Betweenness" onchange="updateTextInputbet(this.value)" value="0">
                   </li>
                 </ul>
@@ -344,8 +344,8 @@
               <div class="collapse" id="findNode">
                 <ul class="navbar-nav ps-3">
                   <li>
-                    <label for="customRange2" class="form-label text-white">Node Id = <input type="text" id="textInputNodeId" class="text-white bg-dark text-center" size="5"></label>
-                    <button onclick="find_node_by_label()">ok</button>
+                    <label class="form-label text-white">Node ID: <input type="text" id="textInputNodeId" class="text-white bg-dark text-center" size="5"></label>
+                    <button type="button" onclick="find_node_by_label()">Find</button>
                   </li>
                 </ul>
               </div>
@@ -360,7 +360,7 @@
               <div class="collapse" id="mostConnected">
                 <ul class="navbar-nav ps-3">
                   <li>
-                    <label for="customRange2" class="form-label text-white">Degree >= <input type="text" id="textInputConnecteddeg" value="0" class="text-white bg-dark text-center" size="5"></label>
+                    <label class="form-label text-white">Degree &ge; <input type="text" id="textInputConnecteddeg" value="0" class="text-white bg-dark text-center" size="5"></label>
                     <input type="range" class="form-range text-white" min="0" max="500" id="MostConnected" onchange="MostConnectedNodes(this.value)" value="0">
                   </li>
                 </ul>
@@ -371,14 +371,14 @@
             <li class="my-4"><hr class="dropdown-divider bg-light" /></li>
             <li>
               <div class="text-muted small fw-bold text-uppercase px-3 mb-3">
-                Addons
+                Tools
               </div>
             </li>
             <li>
               <button class="btn btn-sm btn-outline-secondary ms-3 mb-1" onclick="edge_visualization()" type="button">hide/show-edges</button>
             </li>
             <li>
-              <button class="btn btn-sm btn-outline-secondary ms-3 mb-1" onclick="reset_button()" type="button">Reset</button>
+              <button class="btn btn-sm btn-outline-secondary ms-3 mb-1" onclick="reset_button()" type="button">Reset all</button>
             </li>
             <li>
               <a href="#" class="nav-link px-3">
@@ -448,8 +448,8 @@
                </div>
                <div class="parent">
                   <div class="child" id="connection_tooltip" style="font-size:17px"><b>Nodes:</b> — &emsp; <b>Edges:</b> — </div>
-                  <div class="child" id="ranking_tooltip" style="font-size:17px"><b>Node Ranking:</b> Degree </div>
-                  <div class="child" id="community_ranking_tooltip" style="font-size:16px"><b>Community_ranking:</b> Community_id </div>
+                  <div class="child" id="ranking_tooltip" style="font-size:17px"><b>Node ranking:</b> Degree </div>
+                  <div class="child" id="community_ranking_tooltip" style="font-size:16px"><b>Community ranking:</b> Community ID </div>
                 </div>
                   <svg  id="chart" width="100%" height="80vh" style="resize:both"></svg>
                   
@@ -469,7 +469,7 @@
             <div class="card h-100">
               <div class="card-header">
                 <span class="me-2"><i class="bi bi-bar-chart-fill"></i></span>
-                Selected community chart
+                Node &amp; community details
               </div>
               <div class="card-body">
                 <div id="community_spiral"></div>

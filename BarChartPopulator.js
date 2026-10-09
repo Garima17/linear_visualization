@@ -9,6 +9,15 @@ let coarse_graph
 let number_of_community_connections_data
 let nodeFeatureLookup = {}
 let nodeFeatureColumnName = "" // The name of the feature column in node_features.csv
+
+// display name of the metadata column, e.g. cs_field_class -> "CS field"
+var FEATURE_COLUMN_LABELS = { cs_field_class: "CS field", page_type: "Page type" }
+function feature_column_label(){
+  if (!nodeFeatureColumnName) return "Feature"
+  if (FEATURE_COLUMN_LABELS[nodeFeatureColumnName]) return FEATURE_COLUMN_LABELS[nodeFeatureColumnName]
+  var name = nodeFeatureColumnName.replace(/_/g, ' ')
+  return name.charAt(0).toUpperCase() + name.slice(1)
+}
 let initial_state // snapshot of the page-load view, restored by reset_button()
 
 // Field name mapping — can be overridden per dataset via window.FIELD_NAMES
@@ -43,7 +52,7 @@ function showdata_count(data){
   data = data.sort(function(a,b){return d3.descending(a.y,b.y)})
   var svg = d3.select("#barchart-no_of_nodes")
   initializeChart(svg),
-  draw(data, "Community", "Number_of_nodes", "Number of nodes in each community");
+  draw(data, "Community", "Size (nodes)", "Size of each community");
 }
 
 //for density barchart
@@ -56,7 +65,7 @@ function showdata_density(data){
   data = data.sort(function(a,b){return d3.descending(a.y,b.y)})
   var svg = d3.select("#barchart-density")
   initializeChart(svg),
-  draw(data, "Community", "Edge_Density", "Density of edges in each community");
+  draw(data, "Community", "Edge density", "Edge density of each community");
 }
 
 //for max degree barchart
@@ -69,7 +78,7 @@ function showdata_hdegree(data){
   data = data.sort(function(a,b){return d3.descending(a.y,b.y)})
   var svg = d3.select("#barchart-h_degree")
   initializeChart(svg),
-  draw(data, "Community", "Max Degree", "Max-Degree in each community");
+  draw(data, "Community", "Max degree", "Max degree in each community");
 }
 
 
@@ -83,7 +92,7 @@ function showdata_connections(data){
   data = data.sort(function(a,b){return d3.descending(a.y,b.y)})
   var svg = d3.select("#heatmap-connectivity")
   initializeChart(svg),
-  draw(data, "Community", "Connections", "Inter-Community connections of communities");
+  draw(data, "Community", "Connections", "Connections to other communities");
 }
 
 //for connection heatmap
@@ -116,9 +125,15 @@ function redraw_community_charts(){
 
 function  show_table_data(data){
   // Get every column value
+  // internal columns are hidden: positions, the CSV index, the full-network degree,
+  // betweenness (not computed, always 0) and the metadata column when there is no metadata
+  var hidden_columns = ["x", "y", "new_x", "new_y", "centrality_full", "Unnamed: 0", "betwness"]
+  if (Object.keys(nodeFeatureLookup).length === 0) hidden_columns.push("cs_field")
+  var column_labels = {node: "Node", community: "Community", centrality: "Degree", closeness: "Closeness",
+                       eign: "Eigenvector", density: "Edge density", cs_field: feature_column_label()}
   var columns = Object.keys(data[0])
   .filter(function(d){
-    return ((d != "x" && d != "y" && d != "new_x" && d != "new_y" && d != "centrality_full"));
+    return !hidden_columns.includes(d);
   });
 
   var header = thead.append("tr")
@@ -126,7 +141,7 @@ function  show_table_data(data){
       .data(columns)
       .enter()
       .append("th")
-          .text(function(d){ return d;})
+          .text(function(d){ return column_labels[d] || d;})
           .on("click", function(d, da){
               rows.sort(function(a, b){
                   return b[da] - a[da];
