@@ -61,6 +61,7 @@ function set_active_communities(ids){
   if (!filtered){
     heighest_degree_data = full_community_stats.degree.slice()
     number_of_community_connections_data = full_community_stats.connections.slice()
+    update_slider_ranges()
     return
   }
   var max_degree = {}
@@ -73,6 +74,33 @@ function set_active_communities(ids){
     var count = linked.filter(function(c){ return c != d.community && active_communities.has(+c) }).length
     return {community: d.community, connections: count}
   })
+  update_slider_ranges()
+}
+
+// round up to the slider step, e.g. 0.4631 -> 0.47 for a step of 0.01
+function round_up_to_step(value, step, decimals){
+  return Number((Math.ceil(value / step) * step).toFixed(decimals))
+}
+
+function set_slider_range(id, max, step){
+  var el = document.getElementById(id)
+  if (!el) return
+  // never below the slider's current value, so an applied threshold stays on the slider
+  el.max = Math.max(max, parseFloat(el.value) || 0)
+  el.step = step
+}
+
+// slider ranges follow the data in view (active subset), so every threshold is reachable
+function update_slider_ranges(){
+  var max_of = function(data, key){ return d3.max(data, function(d){ return d[key] }) || 0 }
+  set_slider_range('Degree', max_of(active_data, 'centrality'), 1)
+  set_slider_range('MostConnected', max_of(active_data, 'centrality'), 1)
+  set_slider_range('Closeness', round_up_to_step(max_of(active_data, 'closeness'), 0.01, 2), 0.01)
+  set_slider_range('Eign', round_up_to_step(max_of(active_data, 'eign'), 0.001, 3), 0.001)
+  set_slider_range('commRangeMinSize', max_of(community_size_data, 'size'), 1)
+  set_slider_range('commRangeMinDensity', round_up_to_step(max_of(heighest_density_data, 'density'), 0.01, 2), 0.01)
+  set_slider_range('commRangeMinDegree', max_of(heighest_degree_data, 'degree'), 1)
+  set_slider_range('commRangeMinConn', max_of(number_of_community_connections_data, 'connections'), 1)
 }
 
 // community order for the current community ranking, active communities only

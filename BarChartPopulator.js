@@ -379,6 +379,25 @@ function showdata_spiral_community_chart(data){
 
 DATADIR = window.DATADIR || "./temp_data/"
 
+// Loading overlay: covers the page until the data is drawn (so nothing can be
+// clicked too early), or explains a load failure instead of leaving a blank page
+var loadStartTime = performance.now()
+var loadingOverlay = document.createElement("div")
+loadingOverlay.id = "loading_overlay"
+loadingOverlay.setAttribute("role", "status")
+loadingOverlay.setAttribute("aria-live", "polite")
+loadingOverlay.style.cssText = "position:fixed; top:0; right:0; bottom:0; left:0; z-index:1050; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.9);"
+loadingOverlay.innerHTML = '<div class="text-center"><div class="spinner-border text-secondary" aria-hidden="true"></div><div class="mt-2">Loading data…</div></div>'
+document.body.appendChild(loadingOverlay)
+
+function show_load_error(err){
+  console.error("Data loading failed:", err)
+  loadingOverlay.innerHTML = '<div class="text-center p-4">' +
+    '<div class="fw-bold mb-2">The data for this page could not be loaded.</div>' +
+    '<div class="mb-3">Please tell the study facilitator.</div>' +
+    '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">Reload page</button></div>'
+}
+
 // Load node features CSV (optional - may not exist for all datasets)
 var nodeFeaturesCsvPath = window.NODE_FEATURES_CSV || (DATADIR + "node_features.csv");
 var nodeFeaturesPromise = d3.csv(nodeFeaturesCsvPath).catch(function() {
@@ -386,7 +405,7 @@ var nodeFeaturesPromise = d3.csv(nodeFeaturesCsvPath).catch(function() {
   return null;
 });
 
-Promise.all([
+var tableAndChartsLoaded = Promise.all([
   d3.csv(DATADIR+"facebook_data_transformed_new.csv"),
   d3.csv(DATADIR+"commuity_count.csv"),
   d3.csv(DATADIR+"commuity_density.csv"),
@@ -420,12 +439,10 @@ Promise.all([
     console.log("connections OK");
   }
 
-}).catch(err => {
-  console.error("Promise.all failed:", err);
 });
 
 
-Promise.all([
+var mainChartLoaded = Promise.all([
   d3.csv(DATADIR+"facebook_data_transformed_new.csv"),
   d3.csv(DATADIR+"coarse_graph_pos.csv"),
   d3.csv(DATADIR+"link_data.csv"),
@@ -440,3 +457,10 @@ Promise.all([
   d3.csv(DATADIR+"commuity_number_of_connections.csv"),
   nodeFeaturesPromise
   ]).then(showdata_spiral_community_chart)
+
+// remove the overlay once everything is drawn; this is the point to start timing a task
+Promise.all([tableAndChartsLoaded, mainChartLoaded]).then(function(){
+  loadingOverlay.remove()
+  window.dashboardReadyTime = performance.now()
+  console.info("Dashboard ready after " + Math.round(window.dashboardReadyTime - loadStartTime) + " ms")
+}).catch(show_load_error)
