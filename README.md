@@ -1,6 +1,6 @@
 # Linear Visualization for Graph Data
 
-**[🚀 Live Application (GitHub Pages)](https://karan14-11.github.io/linear_visualization/)**
+**[🚀 Live Application (GitHub Pages)](https://garima17.github.io/linear_visualization/)**
 
 A robust, multi-page web application featuring dynamic D3.js interactive linear visualizations for complex graph datasets.
 
@@ -50,4 +50,4 @@ This app is architected into 4 interactive dataset slots: `Dataset 1`, `Dataset 
    git commit -m "Add data for dataset X"
    git push origin main
    ```
-   **Important note about changes:** Any newly added files must be committed to the github repo to be accessible at the live `https://karan14-11.github.io/linear_visualization/` link. The `index.html` file acts as the router to the rest of the datasets.
+   **Important note about changes:** Any newly added files must be committed to the github repo to be accessible at the live `https://garima17.github.io/linear_visualization/` link. The `index.html` file acts as the router to the rest of the datasets.
