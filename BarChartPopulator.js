@@ -9,6 +9,7 @@ let coarse_graph
 let number_of_community_connections_data
 let nodeFeatureLookup = {}
 let nodeFeatureColumnName = "" // The name of the feature column in node_features.csv
+let initial_state // snapshot of the page-load view, restored by reset_button()
 
 // Field name mapping — can be overridden per dataset via window.FIELD_NAMES
 // Falls back to showing raw values if no mapping provided
@@ -284,6 +285,24 @@ function showdata_spiral_community_chart(data){
       d3.select("#chart").attr("height", height);
       svg = d3.select("#chart");
       initializeSpiralChart(svg, height, width);
+    }
+
+    // Snapshot the page-load state so reset_button() can restore it exactly.
+    // Ranking buttons re-sort these arrays in place, so keep copies.
+    let node_attrs = {}
+    global_data_unchanged.forEach(function(d){
+      node_attrs[d.node] = {community: d.community, density: d.density}
+    })
+    initial_state = {
+      community_order: center_positions_spiral.slice(),
+      size: community_size_data.slice(),
+      degree: heighest_degree_data.slice(),
+      density: heighest_density_data.slice(),
+      connections: number_of_community_connections_data.slice(),
+      node_attrs: node_attrs,
+      chart_height_attr: d3.select("#chart").attr("height"),
+      ranking_label: d3.select("#ranking_tooltip").html(),
+      community_ranking_label: d3.select("#community_ranking_tooltip").html()
     }
 
   draw_spiral_community()
