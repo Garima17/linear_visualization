@@ -100,11 +100,25 @@ function showdata_connectivity_heatmap(data){
   draw_heatmap(data, "Community", "Community", "Community to community connections");
 }
 
+// redraw the community bar charts for the active communities (pages that have them)
+function redraw_community_charts(){
+  if (!document.getElementById("barchart-no_of_nodes")) return
+  // the bar charts share the g / svg1 globals with the main chart, so keep the main chart's
+  var main_g = g, main_svg1 = svg1
+  d3.selectAll("#barchart-no_of_nodes, #barchart-density, #barchart-h_degree, #heatmap-connectivity").selectAll("*").remove()
+  showdata_count(community_size_data.map(function(d){ return {community: d.community, count: d.size} }))
+  showdata_density(heighest_density_data.map(function(d){ return {community: d.community, density: d.density} }))
+  showdata_hdegree(heighest_degree_data.map(function(d){ return {community: d.community, h_degree: d.degree} }))
+  showdata_connections(number_of_community_connections_data.map(function(d){ return {community: d.community, connections: d.connections} }))
+  g = main_g
+  svg1 = main_svg1
+}
+
 function  show_table_data(data){
   // Get every column value
   var columns = Object.keys(data[0])
   .filter(function(d){
-    return ((d != "x" && d != "y" && d != "new_x" && d != "new_y"));
+    return ((d != "x" && d != "y" && d != "new_x" && d != "new_y" && d != "centrality_full"));
   });
 
   var header = thead.append("tr")
@@ -300,12 +314,24 @@ function showdata_spiral_community_chart(data){
       density: heighest_density_data.slice(),
       connections: number_of_community_connections_data.slice(),
       node_attrs: node_attrs,
-      chart_height_attr: d3.select("#chart").attr("height"),
       ranking_label: d3.select("#ranking_tooltip").html(),
       community_ranking_label: d3.select("#community_ranking_tooltip").html()
     }
 
+    // active dataset (settings.js): every community is active at page load.
+    // centrality_full keeps the whole-network degree; centrality is counted inside the active subset
+    global_data_unchanged.forEach(function(d){ d.centrality_full = d.centrality })
+    full_community_stats = {
+      size: initial_state.size.slice(),
+      degree: initial_state.degree.slice(),
+      density: initial_state.density.slice(),
+      connections: initial_state.connections.slice()
+    }
+    set_active_communities(all_community_ids())
+    layout_data = prepare_data
+
   draw_spiral_community()
+  update_counts()
   /*var brush = d3.brush()
   .on("brush", function(){
     console.log("i am in brush")
