@@ -597,11 +597,6 @@ var ARC_MARGIN = 120               // px reserved left of the community circles
 var ARC_COLOUR = "#9aa0a6"
 var ARC_HIGHLIGHT = "#762a83"      // purple: not used by the node colour scales
 var show_background_arcs = true    // toggled by "Show/hide community links"
-// Edge bundling for large datasets (hierarchical bundling along the axis): neighbouring
-// communities on the axis form groups, and every arc between the same two groups is routed
-// through the same two control points, so arcs heading to the same region merge into a bundle
-var EDGE_BUNDLING_MIN_NODES = 10000
-var BUNDLE_BETA = 0.85             // 0 = straight through the control points, 1 = fully bundled
 
 function reset_community_arcs(){
   d3.selectAll(".community_arcs path")
@@ -1732,31 +1727,6 @@ coarse_graph.links.forEach(function(l){
   if (a != b && domain_for_community_legend.includes(a) && domain_for_community_legend.includes(b))
     arc_data.push({a: a, b: b, weight: +l.WEIGHT})
 })
-// bundling: groups of about sqrt(n) consecutive communities on the axis, each with a hub height
-var bundle_arcs = global_data_unchanged.length > EDGE_BUNDLING_MIN_NODES
-var group_size = Math.max(2, Math.round(Math.sqrt(domain_for_community_legend.length)))
-var group_of = {}, group_y = {}
-domain_for_community_legend.forEach(function(c, i){ group_of[c] = Math.floor(i / group_size) })
-d3.group(domain_for_community_legend, function(c){ return group_of[c] }).forEach(function(members, gi){
-  group_y[gi] = d3.mean(members, function(c){ return y(c) })
-})
-var bundle_line = d3.line().curve(d3.curveBundle.beta(BUNDLE_BETA))
-
-function community_link_path(d){
-  var top = y(d.a) <= y(d.b) ? d.a : d.b, bottom = top == d.a ? d.b : d.a
-  var y1 = y(top), y2 = y(bottom)
-  if (!bundle_arcs || group_of[top] === group_of[bottom]) {
-    var ry = (y2 - y1) / 2
-    var rx = Math.min(ry, ARC_MARGIN - 4)   // long links stay inside the margin
-    // from the upper circle to the lower one, bulging left (sweep 0)
-    return "M" + arc_x + "," + y1 + " A" + rx + "," + ry + " 0 0,0 " + arc_x + "," + y2
-  }
-  // shared route between the two groups: hubs at the group heights, as far left as the groups are apart
-  var hub_y1 = group_y[group_of[top]], hub_y2 = group_y[group_of[bottom]]
-  var hub_x = arc_x - Math.min((hub_y2 - hub_y1) / 2, ARC_MARGIN - 4)
-  return bundle_line([[arc_x, y1], [hub_x, hub_y1], [hub_x, hub_y2], [arc_x, y2]])
-}
-
 var arc_weights = d3.extent(arc_data, function(d){ return d.weight })
 var arc_width = d3.scaleLog().domain(arc_weights[0] === arc_weights[1] ? [1, arc_weights[1] + 1] : arc_weights).range([0.5, 4]).clamp(true)
 svg.append("g")
@@ -1766,7 +1736,13 @@ svg.append("g")
   .data(arc_data)
   .enter()
   .append("path")
-    .attr("d", community_link_path)
+    .attr("d", function(d){
+      var y1 = Math.min(y(d.a), y(d.b)), y2 = Math.max(y(d.a), y(d.b))
+      var ry = (y2 - y1) / 2
+      var rx = Math.min(ry, ARC_MARGIN - 4)   // long links stay inside the margin
+      // from the upper circle to the lower one, bulging left (sweep 0)
+      return "M" + arc_x + "," + y1 + " A" + rx + "," + ry + " 0 0,0 " + arc_x + "," + y2
+    })
     .attr("fill", "none")
     .attr("stroke-width", function(d){ return arc_width(d.weight) })
 reset_community_arcs()
