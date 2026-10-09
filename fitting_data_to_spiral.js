@@ -1801,6 +1801,24 @@ coarse_graph_links = svg
     coarse_graph_nodes.on('mouseover', function (e,d) {
       activeCommunity = d.id
       highlight_community_arcs(d.id)
+
+      // tooltip with the community's values; with a community filter, connections and
+      // max degree are counted inside the current view (see set_active_communities)
+      var community_value = function(data, key){
+        var row = data.find(function(r){ return r.community == d.id })
+        return row ? row[key] : undefined
+      }
+      var density = community_value(heighest_density_data, "density")
+      var in_view = community_filter_active() ? " (in current view)" : ""
+      div.transition().duration(200).style("opacity", .9)
+      div.html("<b>Community:</b> " + d.id + "<br/>" +
+               "<b>Size (nodes):</b> " + community_value(community_size_data, "size") + "<br/>" +
+               "<b>Edge density:</b> " + (density === undefined ? "–" : d3.format(".4f")(density)) + "<br/>" +
+               "<b>Connections:</b> " + community_value(number_of_community_connections_data, "connections") + in_view + "<br/>" +
+               "<b>Max degree:</b> " + community_value(heighest_degree_data, "degree") + in_view)
+        .style("left", (e.pageX + 12) + "px")
+        .style("top", (e.pageY - 28) + "px")
+        .style("text-align", "left")
       console.log(d)
       adjacent_community = community_connections_list[d.id]
 
@@ -1847,6 +1865,7 @@ coarse_graph_links = svg
     })
     .on('mouseout', function (d) {
        reset_community_arcs()
+       div.transition().duration(500).style("opacity", 0)
        d3.selectAll("circle")
         .attr("opacity", 1)
       //nodes.style('fill', "#69b3a2")
